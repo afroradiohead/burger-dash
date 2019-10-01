@@ -53,37 +53,26 @@ const GameMainContainer = styled.div`
 function App() {
   const [start, setStart] = useState(false);
   const [blurred, setBlurred] = useState(false);
-
   const dispatch = useDispatch();
-
   const [playing, { toggleAudio }] = useGameAudio("bg", {
     loop: true
   });
 
   const loading = useSelector(state => state.gameStatus.loading, shallowEqual);
 
-  function handleGame(bool) {
-    return function() {
-      setStart(bool);
-      toggleAudio();
-    };
-  }
-
   useEffect(() => {
-    function onBlur() {
+    const onBlur = () => {
       setBlurred(true);
       if (playing) {
         toggleAudio();
       }
     }
-
-    function onFocus() {
+    const onFocus = () => {
       setBlurred(false);
       if (!playing && start) {
         toggleAudio();
       }
     }
-
     dispatch({
       type: gameConstants.SET_PAUSE,
       payload: blurred
@@ -91,25 +80,40 @@ function App() {
 
     window.addEventListener("blur", onBlur);
     window.addEventListener("focus", onFocus);
-
     return () => {
       window.removeEventListener("blur", onBlur);
       window.removeEventListener("focus", onFocus);
     };
   }, [start, playing, blurred]);
 
+
+  const onStart_GameWelcomeScreen = () => {
+    setStart(true);
+    toggleAudio();
+  }
+
+  const onExit_GameModalResult = () => {
+    setStart(false);
+    toggleAudio();
+  }
+
+  const onExit_GameModalSettings = () => {
+    setStart(false);
+    toggleAudio();
+  }
+
   return (
     <div className="App">
       <GameMainContainer>
         {!start ? (
-          <GameWelcomeScreen onStart={handleGame(true)} />
+          <GameWelcomeScreen onStart={() => onStart_GameWelcomeScreen()} />
         ) : (
           <>
             {!loading && (
               <>
-                <GameModalResult onExit={handleGame(false)} />
+                <GameModalResult onExit={() => onExit_GameModalResult()} />
                 <GameModalSettings
-                  onExit={handleGame(false)}
+                  onExit={() => onExit_GameModalSettings()}
                   isBlurred={blurred}
                 />
                 <GameDroppableArea />
